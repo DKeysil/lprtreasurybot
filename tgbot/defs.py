@@ -143,27 +143,19 @@ async def fund_sum(fund_title: str) -> [int, int]:
     :param fund_title:
     :return:
     """
-    resp_json = await google_sheets_values('Visual', 'A2')
-
     fund_title = '#' + fund_title
-    try:
-        # Поиск номера фонда из списка фондов с целями
-        numb = [val[0] for val in resp_json].index(fund_title)
-        fund = int(resp_json[numb][2])  # Количество денег в фонде, int
-        fund_goal = int(float(resp_json[numb][4]))  # Цель сбора у фонда, int
-        return [fund, fund_goal]
 
-    except ValueError:
-        resp_json = await google_sheets_values('Состояние по фондам в рублях', 'A2')
+    fund_goals = await google_sheets_values('lprtreasurybot.fund_goals', 'A1', 'C99999')
 
-        try:
-            numb = [val[1] for val in resp_json].index(
-                fund_title)  # Поиск номера фонда во всех фондах
-        except ValueError:
-            return None
-        fund = int(resp_json[numb][0])  # Количество денег в фонде
-        return [fund, 0]
+    for [balance, fund, goal] in fund_goals:
+        if fund == fund_title:
+            return [balance, goal]
 
+    funds = await google_sheets_values('lprtreasurybot.funds', 'A1', 'B99999')
+
+    for [balance, fund] in funds:
+        if fund == fund_title:
+            return [balance, 0]
 
 async def rating_string(month=time.strftime("%m"), year=time.strftime("%y")) -> str:
     """

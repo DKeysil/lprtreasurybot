@@ -4,7 +4,7 @@ from defs import google_sheets_values, beauty_sum
 
 @dp.message_handler(commands=['funds'])
 async def funds(message: types.Message):
-    _funds = await google_sheets_values('Состояние по фондам в рублях', 'A2', 'B1000')
+    _funds = await google_sheets_values('lprtreasurybot.funds', 'A1', 'B99999')
 
     _funds = [[i[0], i[1][1:]] for i in _funds if int(i[0]) != 0]
 
