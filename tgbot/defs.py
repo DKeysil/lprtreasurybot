@@ -1,4 +1,6 @@
 
+from typing import List
+
 import os
 import time
 import re
@@ -46,7 +48,7 @@ async def google_sheets_values(
     async with aiohttp.ClientSession(loop=loop) as session:
         async with session.get(url, params=params) as response:
             json = await response.json()
-            return json['values']
+            return json.get('values', [])
 
 
 def parse_command(text):
@@ -136,6 +138,26 @@ def get_fund_image(just_sum: int, fund_name: str, goal: int) -> str:
     img.save(out_file)
     return out_file
 
+def normalize_fund_title(fund_title: str) -> str:
+    if not fund_title.startswith('#'):
+        return '#' + fund_title
+    return fund_title
+
+async def choose_default_fund(
+        preffered_default_funds: List[str] = ['#офис', '#выборы']
+) -> str:
+    """
+    Выбирает фонд по умолчанию.
+    Первый из `preffered_default_funds` или, если он не находится, то произвольный.
+    """
+    funds = await google_sheets_values('lprtreasurybot.funds', 'B1', 'B99999')
+    funds = { fund[0] for fund in funds }
+
+    for preffered_default_fund in preffered_default_funds:
+        if preffered_default_fund in funds:
+            return preffered_default_fund
+
+    return funds.pop()
 
 async def fund_sum(fund_title: str) -> [int, int]:
     """
@@ -143,7 +165,7 @@ async def fund_sum(fund_title: str) -> [int, int]:
     :param fund_title:
     :return:
     """
-    fund_title = '#' + fund_title
+    fund_title = normalize_fund_title(fund_title)
 
     fund_goals = await google_sheets_values('lprtreasurybot.fund_goals', 'A1', 'C99999')
 
