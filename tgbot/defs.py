@@ -214,7 +214,7 @@ async def rating_string(month=time.strftime("%m"), year=time.strftime("%y")) -> 
 
 
 async def update_data():
-    sheet_rows = await google_sheets_values('Транзакции', 'A2', 'L99999')
+    sheet_rows = await google_sheets_values('lprtreasurybot.transactions', 'A1', 'J99999')
 
     db_rows = []
     for row in sheet_rows:
@@ -231,7 +231,6 @@ async def update_data():
             total,
             currency,
             tax_free,
-            _,
             treasury_balance,
         ] = row
 
