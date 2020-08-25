@@ -12,9 +12,9 @@ from motor_client import SingletonClient
 from loop import loop
 
 GOOGLE_SHEETS_API_KEY = os.environ['GOOGLE_SHEETS_API_KEY']
+GOOGLE_SHEETS_SPREADSHEET_ID = os.environ['GOOGLE_SHEETS_SPREADSHEET_ID']
 
 GOOGLE_SHEETS_BASE_URL = 'https://sheets.googleapis.com/v4/spreadsheets'
-GOOGLE_SHEETS_SPREADSHEET_ID = '1sRwkcvvYqPrHFpnEdkiEjkhd-j7obFX3KF4NI0AUu6Y'
 
 
 async def google_sheets_values(
