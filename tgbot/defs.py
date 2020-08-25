@@ -214,39 +214,52 @@ async def rating_string(month=time.strftime("%m"), year=time.strftime("%y")) -> 
 
 
 async def update_data():
-    _data = await google_sheets_values('Транзакции', 'A2')
+    sheet_rows = await google_sheets_values('Транзакции', 'A2', 'L99999')
 
-    _lst = []
-    list_of_rows = []
-    for i in range(len(_data)):
-        if not (bool(_data[i][0]) and bool(_data[i][5]) and bool(_data[i][6])):
-            _lst.append(i)
-        else:
-            row_dict = {"from": _data[i][0].lower()}
-            row_dict.update({"total_currency": _data[i][1]})
-            row_dict.update({"currency_name": _data[i][2]})
-            row_dict.update({"fund": _data[i][3]})
-            row_dict.update({"comment": _data[i][4]})
-            row_dict.update(
-                {"date": str(datetime.strptime(_data[i][5], "%d.%m.%Y"))})
-            row_dict.update({"total": _data[i][6]})
-            row_dict.update({"currency": _data[i][7]})
-            if _data[i][8] == "TRUE":
-                row_dict.update({"taxFree": True})
-            else:
-                row_dict.update({"taxFree": False})
-            row_dict.update({"treasuryBalance": _data[i][10]})
+    db_rows = []
+    for row in sheet_rows:
+        if len(row) != 10:
+            continue
 
-            list_of_rows.append(row_dict)
+        [
+            from_,
+            total_currency,
+            currency_name,
+            fund,
+            comment,
+            date,
+            total,
+            currency,
+            tax_free,
+            _,
+            treasury_balance,
+        ] = row
+
+        if not (bool(from_) and bool(date) and bool(total)):
+            continue
+
+        db_row = {
+            "from": from_.lower(),
+            "total_currency": total_currency,
+            "currency_name": currency_name,
+            "fund": fund,
+            "comment": comment,
+            "date": str(datetime.strptime(date, "%d.%m.%Y")),
+            "total": total,
+            "currency": currency,
+            "taxFree": tax_free == "TRUE",
+            "treasuryBalance": treasury_balance,
+        }
+
+        db_rows.append(db_row)
 
     db = SingletonClient.get_data_base()
-    collection = db.transactions
 
     # Удаляются все данные из коллекции
-    delete_result = await collection.delete_many({})
+    delete_result = await db.transactions.delete_many({})
     print('Update data. Delete transactions:\n' + str(delete_result.raw_result))
 
     # Таблица заполняется обновленным данными
-    insert_result = await collection.insert_many(list_of_rows)
+    insert_result = await db.transactions.insert_many(db_rows)
     print('Update data. Insert transactions = ' +
           str(insert_result.inserted_ids))
