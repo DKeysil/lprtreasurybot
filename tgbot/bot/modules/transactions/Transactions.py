@@ -5,11 +5,11 @@ from defs import beauty_sum
 from datetime import datetime
 
 
-@dp.message_handler(commands=['stats'])
-async def stats(message: types.Message):
+@dp.message_handler(commands=['t'])
+async def transactions(message: types.Message):
     """
     Создает сообщение со списком транзакций конкретного пользователя.
-    Уточнить пользователя из таблицы можно вторым параметром (/stats username)
+    Уточнить пользователя из таблицы можно вторым параметром (/t username)
     """
 
     mention = await get_mention(message)
@@ -18,26 +18,26 @@ async def stats(message: types.Message):
     if transactions is None:
         return await message.reply('Транзакции этого пользователя не найдены')
 
-    string = f"Донаты пользователя {mention}:\n"
+    string = f"Транзакции пользователя {mention}:\n"
     string += get_transcations_string(transactions)
 
     markup = types.InlineKeyboardMarkup()
 
     """
     callback_data:
-    1) stats - название модуля
+    1) t - название модуля
     2) l, r, n - left, right, none
     3) int - номер страницы
     4) имя пользователя для поиска в таблице
     """
 
     left_button = types.InlineKeyboardButton(
-        text='❌', callback_data=f'stats,l,0,{mention}')
+        text='❌', callback_data=f't,l,0,{mention}')
 
     right_list = await get_transcations(1, mention)
     if right_list:
         right_button = types.InlineKeyboardButton(
-            text='➡️', callback_data=f'stats,r,1,{mention}'
+            text='➡️', callback_data=f't,r,1,{mention}'
         )
 
         markup.row(left_button, right_button)
@@ -46,11 +46,11 @@ async def stats(message: types.Message):
         _message = await message.answer(string, parse_mode='HTML')
 
 
-@dp.callback_query_handler(lambda callback_query: callback_query.data.split(',')[0] == 'stats')
-async def handle_test(callback_query: types.CallbackQuery):
+@dp.callback_query_handler(lambda callback_query: callback_query.data.split(',')[0] == 't')
+async def handle_t_callback_query(callback_query: types.CallbackQuery):
     """
     Обработчик нажатия на кнопку под сообщением со списком транзакций.
-    Лямбда проверяет, чтобы обрабатывалось только stats кнопки
+    Лямбда проверяет, чтобы обрабатывалось только y кнопки
 
     Args:
         callback_query (types.CallbackQuery): Документация на сайте телеграма
@@ -63,7 +63,7 @@ async def handle_test(callback_query: types.CallbackQuery):
     mention = split_data[3]
 
     transactions = await get_transcations(page, mention)
-    string = f"Донаты пользователя {mention}:\n"
+    string = f"Транзакции пользователя {mention}:\n"
     string += get_transcations_string(transactions)
 
     markup = types.InlineKeyboardMarkup()
@@ -72,19 +72,19 @@ async def handle_test(callback_query: types.CallbackQuery):
     left_list = await get_transcations(page - 1, mention)
     if left_list:
         left_button = types.InlineKeyboardButton(
-            text='⬅️', callback_data=f'stats,l,{page-1},{mention}')
+            text='⬅️', callback_data=f't,l,{page-1},{mention}')
     else:
         left_button = types.InlineKeyboardButton(
-            text='❌', callback_data=f'stats,n,{page},{mention}')
+            text='❌', callback_data=f't,n,{page},{mention}')
 
     # Проверяет, есть ли транзакции на следующих страницах.
     right_list = await get_transcations(page + 1, mention)
     if right_list:
         right_button = types.InlineKeyboardButton(
-            text='➡️', callback_data=f'stats,r,{page+1},{mention}')
+            text='➡️', callback_data=f't,r,{page+1},{mention}')
     else:
         right_button = types.InlineKeyboardButton(
-            text='❌', callback_data=f'stats,n,{page},{mention}')
+            text='❌', callback_data=f't,n,{page},{mention}')
 
     markup.row(left_button, right_button)
 
