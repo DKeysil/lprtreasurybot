@@ -12,4 +12,4 @@ from bot.modules import rating
 
 from bot.modules import send_treasury_update
 
-from bot.modules import stats
+from bot.modules import transactions

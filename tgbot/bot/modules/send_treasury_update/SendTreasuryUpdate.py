@@ -2,6 +2,7 @@ from bot import bot
 from defs import beauty_sum, update_data
 from datetime import datetime
 from motor_client import SingletonClient
+import os
 
 
 async def send_treasury_update():
@@ -32,7 +33,8 @@ async def send_treasury_update():
         string += '\n{name}: <b>{amount}</b> ₽ - фонд: {fund_name}\n'.format(
             name=data['from'], amount=beauty_sum(data['total']), fund_name=data['fund'])
 
+    string += f'\n<a href="{os.environ["DONATE_LINK"]}">Задонатить</a>'
     for user in users:
         print("user: ")
         print(user)
-        await bot.send_message(user['user_id'], string, parse_mode='HTML')
+        await bot.send_message(user['user_id'], string, parse_mode='HTML', disable_web_page_preview=True)

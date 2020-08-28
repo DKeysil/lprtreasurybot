@@ -1,14 +1,16 @@
 from bot import dp, types
 from defs import parse_command, normalize_fund_title, choose_default_fund, fund_sum, fund_string, get_fund_image
 
+
 async def send_fund(message, fund_total, fund_title, fund_goal):
     fund_title = fund_title[1:]
 
     if fund_goal == 0:
-        await message.reply(fund_string(fund_total, fund_title, fund_goal), parse_mode='HTML')
+        await message.reply(fund_string(fund_total, fund_title, fund_goal), parse_mode='HTML', disable_web_page_preview=True)
     else:
         image_path = get_fund_image(fund_total, fund_title, fund_goal)
-        await message.reply_photo(types.InputFile(image_path), parse_mode='HTML')
+        await message.reply_photo(types.InputFile(image_path), parse_mode='HTML', disable_web_page_preview=True)
+
 
 @dp.message_handler(commands=['fund'])
 async def fund(message: types.Message):

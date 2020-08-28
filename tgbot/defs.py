@@ -26,10 +26,10 @@ async def google_sheets_values(
         value_render_option: str = 'UNFORMATTED_VALUE',
         date_time_render_option: str = 'FORMATTED_STRING',
 ) -> dict:
-    
+
     range_ = '!'.join([
         sheet,
-        ':'.join([start, stop,]),
+        ':'.join([start, stop, ]),
     ])
 
     url = '/'.join([
@@ -89,6 +89,8 @@ def fund_string(just_sum: int, fund_name: str, goal=0) -> str:
                                                                              int(just_sum //
                                                                                  (goal / 10)) * '●',
                                                                              int(10 - just_sum // (goal / 10)) * '○')
+
+    string += f'\n<a href="{os.environ["DONATE_LINK"]}">Задонатить</a>'
     return string
 
 
@@ -138,10 +140,12 @@ def get_fund_image(just_sum: int, fund_name: str, goal: int) -> str:
     img.save(out_file)
     return out_file
 
+
 def normalize_fund_title(fund_title: str) -> str:
     if not fund_title.startswith('#'):
         return '#' + fund_title
     return fund_title
+
 
 async def choose_default_fund(
         preffered_default_funds: List[str] = ['#офис', '#выборы']
@@ -151,13 +155,14 @@ async def choose_default_fund(
     Первый из `preffered_default_funds` или, если он не находится, то произвольный.
     """
     funds = await google_sheets_values('lprtreasurybot.funds', 'B1', 'B99999')
-    funds = { fund[0] for fund in funds }
+    funds = {fund[0] for fund in funds}
 
     for preffered_default_fund in preffered_default_funds:
         if preffered_default_fund in funds:
             return preffered_default_fund
 
     return funds.pop()
+
 
 async def fund_sum(fund_title: str) -> [int, int]:
     """
@@ -178,6 +183,7 @@ async def fund_sum(fund_title: str) -> [int, int]:
     for [balance, fund] in funds:
         if fund == fund_title:
             return [balance, 0]
+
 
 async def rating_string(month=time.strftime("%m"), year=time.strftime("%y")) -> str:
     """

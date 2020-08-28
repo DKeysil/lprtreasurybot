@@ -2,6 +2,7 @@ from bot import dp, types
 from defs import rating_string, update_data
 import time
 import re
+import os
 
 
 async def get_string(message: types.Message) -> str:
@@ -21,6 +22,8 @@ async def get_string(message: types.Message) -> str:
         string = await rating_string(month=month, year=year)
     except ValueError:
         string = await rating_string()
+
+    string += f'\n<a href="{os.environ["DONATE_LINK"]}">Задонатить</a>'
     return string
 
 
@@ -31,7 +34,7 @@ async def rating(message: types.Message):
 
     # Если донаты есть, то строка существует
     if string:
-        _message = await message.reply(string, parse_mode='HTML')
+        _message = await message.reply(string, parse_mode='HTML', disable_web_page_preview=True)
 
         await update_data()  # Апдейт данных из таблицы
         # если информация неактуальна, то сообщение будет изменено
@@ -39,7 +42,7 @@ async def rating(message: types.Message):
         if string == _string:
             return None
 
-        await _message.edit_text(_string, parse_mode='HTML')
+        await _message.edit_text(_string, parse_mode='HTML', disable_web_page_preview=True)
         return None
 
     _message = await message.reply('Донатов за этот месяц еще не поступало :(')
@@ -49,4 +52,4 @@ async def rating(message: types.Message):
     if string == _string:
         return None
 
-    await _message.edit_text(_string, parse_mode='HTML')
+    await _message.edit_text(_string, parse_mode='HTML', disable_web_page_preview=True)
