@@ -9,7 +9,7 @@ async def send_fund(message, fund_total, fund_title, fund_goal):
         await message.reply(fund_string(fund_total, fund_title, fund_goal), parse_mode='HTML', disable_web_page_preview=True)
     else:
         image_path = get_fund_image(fund_total, fund_title, fund_goal)
-        await message.reply_photo(types.InputFile(image_path), parse_mode='HTML', disable_web_page_preview=True)
+        await message.reply_photo(types.InputFile(image_path), parse_mode='HTML')
 
 
 @dp.message_handler(commands=['fund'])
