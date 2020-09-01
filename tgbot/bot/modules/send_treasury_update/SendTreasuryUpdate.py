@@ -3,8 +3,11 @@ from defs import beauty_sum, update_data
 from datetime import datetime
 from motor_client import SingletonClient
 import os
+from loop import loop
+import aiocron
 
 
+@aiocron.crontab('0 20 * * 1', loop=loop)
 async def send_treasury_update():
     """
     Отправляет уведомление

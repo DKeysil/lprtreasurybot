@@ -3,6 +3,7 @@ from motor_client import SingletonClient
 from datetime import datetime
 from defs import beauty_sum
 from datetime import datetime
+from defs import update_data
 
 
 @dp.message_handler(commands=['t'])
@@ -14,6 +15,7 @@ async def transactions(message: types.Message):
 
     mention = await get_mention(message)
 
+    await update_data()
     transactions = await get_transcations(0, mention)
     if transactions is None:
         return await message.reply('Транзакции этого пользователя не найдены')
