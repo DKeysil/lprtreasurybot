@@ -23,7 +23,12 @@ async def get_string(message: types.Message) -> str:
     except ValueError:
         string = await rating_string()
 
-    string += f'\n<a href="{os.environ["DONATE_LINK"]}">Задонатить</a>'
+    if string:
+        string += f'\n<a href="{os.environ["DONATE_LINK"]}">Задонатить</a>'
+    else:
+        # Если строка рейтинга пустая вернуть none
+        return None
+
     return string
 
 
