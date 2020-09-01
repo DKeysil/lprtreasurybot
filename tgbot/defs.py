@@ -227,8 +227,13 @@ async def rating_string(month=time.strftime("%m"), year=time.strftime("%y")) -> 
     string = f'Топ 10 жертвователей за {month}.{year}:\n'
 
     for i in range(len(list_d)):
-        string += '{}) {} - <b>{}</b> ₽\n'.format(
-            i + 1, list_d[i][0], beauty_sum(list_d[i][1]))
+        if list_d[i][0].startswith('@'):
+            print
+            string += '{}) <a href="https://t.me/{nickname}">{mention}</a> - <b>{sum}</b> ₽\n'.format(
+                i + 1, nickname=list_d[i][0][1:], mention=list_d[i][0], sum=beauty_sum(list_d[i][1]))
+        else:
+            string += '{}) {} - <b>{}</b> ₽\n'.format(
+                i + 1, list_d[i][0], beauty_sum(list_d[i][1]))
 
     return string
 
