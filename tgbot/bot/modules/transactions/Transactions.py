@@ -4,6 +4,7 @@ from datetime import datetime
 from defs import beauty_sum
 from datetime import datetime
 from defs import update_data
+from defs import get_mention
 
 
 @dp.message_handler(commands=['t'])
@@ -146,27 +147,3 @@ def get_transcations_string(transactions: list) -> str:
         string += f'{date.strftime("%d.%m.%Y")} <code>{beauty_sum(data["total"]).strip(): >6}</code> ₽ {data["fund"]}\n'
 
     return string
-
-
-async def get_mention(message: types.Message) -> str:
-    """
-    Функция для получения ника пользователя.
-
-    Args:
-        message (types.Message): Сообщение
-
-    Returns:
-        (str): Ник пользователя в строковом формате
-    """
-    text = message.text
-
-    try:
-        mention = text.split(' ')[1]
-        if len(mention) > 32:
-            # Если ник пользователя будет слишком длинным, может не влезть в callback
-            return await message.reply('Указанное имя слишком длинное')
-    except IndexError:
-        mention = message.from_user.mention
-    mention = mention.lower()
-
-    return mention

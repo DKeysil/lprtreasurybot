@@ -12,6 +12,7 @@ from PIL import Image, ImageDraw, ImageFont
 
 from motor_client import SingletonClient
 from loop import loop
+from bot import types
 
 GOOGLE_SHEETS_API_KEY = os.environ['GOOGLE_SHEETS_API_KEY']
 GOOGLE_SHEETS_SPREADSHEET_ID = os.environ['GOOGLE_SHEETS_SPREADSHEET_ID']
@@ -48,6 +49,7 @@ async def google_sheets_values(
     async with aiohttp.ClientSession(loop=loop) as session:
         async with session.get(url, params=params) as response:
             json = await response.json()
+            print('google sheets values response: {}'.format(str(json)))
             return json.get('values', [])
 
 
@@ -125,17 +127,17 @@ def get_fund_image(just_sum: int, fund_name: str, goal: int) -> str:
 
     # Отрисовка шрифтов
     fund_name = fund_name[0].upper() + fund_name[1:]
-    draw.text((22, 40), fund_name, fill='#ffffff', font=font_title)
+    draw.text((22, 68), fund_name, fill='#ffffff', font=font_title)
 
-    draw.text((22, 157), beauty_sum(just_sum),
+    draw.text((22, 185), beauty_sum(just_sum),
               fill='#ffffff', font=font_digitals)
-    draw.text((355, 157), beauty_sum(goal) + '₽',
+    draw.text((355, 185), beauty_sum(goal) + '₽',
               fill='#ffffff', font=font_digitals)
 
     # Отрисовка прогресс бара
     width = 16 + int(just_sum / goal * 467)
 
-    draw.rectangle([16, 113, width, 139], fill='#c1a66f')
+    draw.rectangle([16, 141, width, 168], fill='#c1a66f')
 
     img.save(out_file)
     return out_file
@@ -287,3 +289,27 @@ async def update_data():
     insert_result = await db.transactions.insert_many(db_rows)
     print('Update data. Insert transactions = ' +
           str(insert_result.inserted_ids))
+
+
+async def get_mention(message: types.Message) -> str:
+    """
+    Функция для получения ника пользователя.
+
+    Args:
+        message (types.Message): Сообщение
+
+    Returns:
+        (str): Ник пользователя в строковом формате
+    """
+    text = message.text
+
+    try:
+        mention = text.split(' ')[1]
+        if len(mention) > 32:
+            # Если ник пользователя будет слишком длинным, может не влезть в callback
+            return await message.reply('Указанное имя слишком длинное')
+    except IndexError:
+        mention = message.from_user.mention
+    mention = mention.lower()
+
+    return mention

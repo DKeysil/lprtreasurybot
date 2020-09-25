@@ -24,6 +24,6 @@ class SingletonClient:
         if SingletonClient.db is None:
             client = SingletonClient.get_client()
             MONGODB_DATABASE = os.environ['MONGODB_DATABASE']
-            db = client[MONGODB_DATABASE]
+            SingletonClient.db = client[MONGODB_DATABASE]
 
-        return db
+        return SingletonClient.db
