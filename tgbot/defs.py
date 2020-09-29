@@ -156,6 +156,13 @@ async def choose_default_fund(
     Выбирает фонд по умолчанию.
     Первый из `preffered_default_funds` или, если он не находится, то произвольный.
     """
+    db = SingletonClient.get_data_base()
+
+    preffered_settings_fund = await db.settings.find_one({'id': 0})
+    if preffered_settings_fund:
+        preffered_default_funds = [
+            preffered_settings_fund.get('preffered_fund')]
+
     funds = await google_sheets_values('lprtreasurybot.funds', 'B1', 'B99999')
     funds = {fund[0] for fund in funds}
 
@@ -187,25 +194,50 @@ async def fund_sum(fund_title: str) -> [int, int]:
             return [balance, 0]
 
 
-async def rating_string(month=time.strftime("%m"), year=time.strftime("%y")) -> str:
+async def rating_string(
+        month=time.strftime("%m"),
+        year=time.strftime("%y"),
+        to_month=time.strftime("%m"),
+        to_year=time.strftime("%y"),
+        fund=None) -> str:
+
     """
-    Метод возвращает строку, которая содержит топ 5 донатеров
-    :return:
+    builds rating string which contains list of donaters
+
+    Args:
+        month (datetime): initial month
+        year (datetime): initial year
+        to_month (datetime): end month
+        to_year (datetime): end year
+        fund (str): fund name
+
+    Returns:
+        str: message which ready to send to user
     """
 
     year = '20' + year
+    to_year = '20' + to_year
 
     # Сделать импорт нужных данных из монго
     db = SingletonClient.get_data_base()
     collection = db.transactions
+    if fund:
+        cursor = collection.find({
+            "fund": normalize_fund_title(fund)
+        })
 
-    cursor = collection.find({
-        "date": {
-            "$gte": str(datetime.strptime("01 {} {}".format(month, year), "%d %m %Y")),
-            "$lte": str(
-                datetime.strptime("{} {} {}".format(monthrange(int(year), int(month))[1], month, year), "%d %m %Y"))
-        }
-    })
+    else:
+        cursor = collection.find({
+            "date": {
+                "$gte": str(datetime.strptime("01 {} {}".format(month, year), "%d %m %Y")),
+                "$lte": str(
+                    datetime.strptime("{} {} {}".format(
+                        monthrange(int(to_year), int(to_month))[1],
+                        to_month,
+                        to_year), "%d %m %Y")
+                )
+            }
+        })
 
     contributions = await cursor.to_list(length=await collection.count_documents({}))
 
@@ -226,7 +258,13 @@ async def rating_string(month=time.strftime("%m"), year=time.strftime("%y")) -> 
     list_d.sort(key=lambda j: j[1], reverse=True)
     list_d = list_d[:10]
 
-    string = f'Топ 10 жертвователей за {month}.{year}:\n'
+    string = 'Топ 10 жертвователей '
+    string += f'фонда {fund}' if fund else ''
+    string += f'за {month}.{year}' if fund is None else ''
+    string += f'-{to_month}.{to_year}' if (to_month !=
+                                           month or to_year != year) else ''
+
+    string += ':\n'
 
     for i in range(len(list_d)):
         if list_d[i][0].startswith('@'):

@@ -8,13 +8,14 @@ from defs import get_mention
 
 
 @dp.message_handler(commands=['t'])
-async def transactions(message: types.Message):
+async def transactions(message: types.Message, mention=None):
     """
     Создает сообщение со списком транзакций конкретного пользователя.
     Уточнить пользователя из таблицы можно вторым параметром (/t username)
     """
 
-    mention = await get_mention(message)
+    if not mention:
+        mention = await get_mention(message)
 
     await update_data()
     transactions = await get_transcations(0, mention)

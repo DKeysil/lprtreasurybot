@@ -6,22 +6,49 @@ import os
 
 
 async def get_string(message: types.Message) -> str:
+    """
+    Trying to find argument in message and get string from def/rating_string(), 
+    if it doesn't exist just get string from def/rating_string()
+
+    Args:
+        message (types.Message): telegram message
+
+    Returns:
+        str: string which contains list of top donaters
+    """
 
     try:
+        argument = message.get_args().split(' ')[0]
         # Проверка сообщения на соответствие с стандартом "month.year"
         pattern = r'((0[1-9]|1[0-2])\.([0-9]\d))'
-        _time = re.search(pattern, message.get_args().split(' ')[0]).group()
+        # Проверка сообщения на соответствие с стандартом "month.year-month.year"
+        range_pattern = r'((0[1-9]|1[0-2])\.([0-9]\d))\-((0[1-9]|1[0-2])\.([0-9]\d))'
+        _time = re.search(pattern, argument).group()
+        _range_time = re.search(range_pattern, argument).group().split('-')[1]
     except AttributeError:
         _time = ''
-    print(_time)
-    try:
-        # Если будет найдена передаваемая пользователем дата, то она будет передана
-        _time = time.strptime(_time, "%m.%y")
-        month = time.strftime('%m', _time)
-        year = time.strftime('%y', _time)
-        string = await rating_string(month=month, year=year)
-    except ValueError:
-        string = await rating_string()
+
+    # Проверка сообщения на запрос фонда (Не начинается с цифры)
+    fund_pattern = r'^\D*'
+    fund = re.search(fund_pattern, argument).group()
+    if fund:
+        string = await rating_string(fund=fund)
+    else:
+        try:
+            # Если будет найдена передаваемая пользователем дата, то она будет передана
+            _time = time.strptime(_time, "%m.%y")
+            month = time.strftime('%m', _time)
+            year = time.strftime('%y', _time)
+            if _range_time:
+                _range_time = time.strptime(_range_time, "%m.%y")
+                to_month = time.strftime('%m', _range_time)
+                to_year = time.strftime('%y', _range_time)
+                string = await rating_string(month=month, year=year, to_month=to_month, to_year=to_year)
+            else:
+                string = await rating_string(month=month, year=year)
+        except ValueError:
+            # if user doesn't pass time argument call rating_string() with default arguments
+            string = await rating_string()
 
     if string:
         string += f'\n<a href="{os.environ["DONATE_LINK"]}">Задонатить</a>'
