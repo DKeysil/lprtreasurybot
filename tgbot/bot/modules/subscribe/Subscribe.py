@@ -38,4 +38,11 @@ async def subscribe(message: types.Message):
         )
         print('Subscribe. Update user:\n' + str(result.raw_result))
         await message.reply('Вы успешно подписались на обновления')
+    else:
+        result = await db.users.update_one(
+            {"user_id": message.from_user.id},
+            {"$set": {'subscribe': True}}
+        )
+        print('Subscribe. Update user:\n' + str(result.raw_result))
+        await message.reply('Вы успешно подписались на обновления')
         

@@ -23,4 +23,4 @@ async def start(message: types.Message):
         result = await users_collection.insert_one(user_data)
         print('start. Insert user id = ' + str(result.inserted_id))
 
-        await message.reply('Добро пожаловать.\nКоманда /menu открое меню команд.')
+        await message.reply('Добро пожаловать.\nКоманда /menu откроет меню команд.')

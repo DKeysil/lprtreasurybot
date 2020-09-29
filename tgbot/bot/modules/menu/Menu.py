@@ -30,10 +30,10 @@ async def menu(message: types.Message):
     user = await users_collection.find_one({
         "user_id": message.from_user.id
     })
-
-    if user.get('treasurer'):
-        settings_button = types.KeyboardButton('/settings')
-        btn_list.append([settings_button])
+    if user:
+        if user.get('treasurer'):
+            settings_button = types.KeyboardButton('/settings')
+            btn_list.append([settings_button])
 
     menu_keyboard_markup = types.ReplyKeyboardMarkup(btn_list)
     await message.answer('Вам открыт доступ к меню бота.', reply_markup=menu_keyboard_markup)
