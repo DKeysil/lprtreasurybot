@@ -18,12 +18,13 @@ async def transactions(message: types.Message, mention=None):
         mention = await get_mention(message)
 
     await update_data()
-    transactions = await get_transcations(0, mention)
+    _transactions, transactions_sum = await get_transcations(0, mention)
     if transactions is None:
         return await message.reply('Транзакции этого пользователя не найдены')
 
     string = f"Транзакции пользователя {mention}:\n"
-    string += get_transcations_string(transactions)
+    string += f'Общая сумма донатов - <code>{beauty_sum(transactions_sum)}</code>₽\n\n'
+    string += get_transcations_string(_transactions)
 
     markup = types.InlineKeyboardMarkup()
 
@@ -66,9 +67,10 @@ async def handle_t_callback_query(callback_query: types.CallbackQuery):
     page = int(split_data[2])
     mention = split_data[3]
 
-    transactions = await get_transcations(page, mention)
+    _transactions, transactions_sum = await get_transcations(page, mention)
     string = f"Транзакции пользователя {mention}:\n"
-    string += get_transcations_string(transactions)
+    string += f'Общая сумма донатов - <code>{beauty_sum(transactions_sum)}</code>₽\n'
+    string += get_transcations_string(_transactions)
 
     markup = types.InlineKeyboardMarkup()
 
@@ -96,7 +98,7 @@ async def handle_t_callback_query(callback_query: types.CallbackQuery):
     await callback_query.answer()
 
 
-async def get_transcations(page: int, mention) -> list:
+async def get_transcations(page: int, mention) -> (list, int):
     """
     Сахар для получения списка транзакций
 
@@ -105,7 +107,7 @@ async def get_transcations(page: int, mention) -> list:
         mention ([type]): ник пользователя. По нему идет поиск в бд
 
     Returns:
-        list: Возвращает список транзакций соответствующий странице
+        list[{'total': int, 'fund': str}]: Возвращает список транзакций соответствующий странице
     """
     db = SingletonClient.get_data_base()
 
@@ -123,27 +125,26 @@ async def get_transcations(page: int, mention) -> list:
         "from": mention
     }).sort('date', -1)
 
-    transactions = await cursor.to_list(length=await db.transactions.count_documents({}))
-
+    _transactions = await cursor.to_list(length=await db.transactions.count_documents({}))
+    transactions_sum = sum([value['total'] for value in _transactions if value['total'] > 0])
     try:
-        return transactions[page * 10: page * 10 + 10]
+        return _transactions[page * 10: page * 10 + 10], transactions_sum
     except IndexError:
-        return []
+        return [], 0
 
 
-def get_transcations_string(transactions: list) -> str:
+def get_transcations_string(_transactions: list) -> str:
     """
     Генерирует строку из входящего списка транзакций
 
     Args:
-        transactions (list): Список транзакций из метода get_transactions
+        _transactions (list): Список транзакций из метода get_transactions
 
     Returns:
         str: Возвращает список донатов в строковом формате
     """
     string = ""
-
-    for data in transactions:
+    for data in _transactions:
         date = datetime.strptime(data['date'][0:10], '%Y-%m-%d')
         string += f'{date.strftime("%d.%m.%Y")} <code>{beauty_sum(data["total"]).strip(): >6}</code> ₽ {data["fund"]}\n'
 

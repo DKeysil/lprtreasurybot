@@ -195,11 +195,11 @@ async def fund_sum(fund_title: str) -> [int, int]:
 
 
 async def rating_string(
-        month=time.strftime("%m"),
-        year=time.strftime("%y"),
-        to_month=time.strftime("%m"),
-        to_year=time.strftime("%y"),
-        fund=None) -> str:
+        month: str = time.strftime("%m"),
+        year: str = time.strftime("%y"),
+        to_month: str = None,
+        to_year: str = None,
+        fund: str = None) -> str:
 
     """
     builds rating string which contains list of donaters
@@ -215,6 +215,8 @@ async def rating_string(
         str: message which ready to send to user
     """
 
+    if to_month is None and to_year is None:
+        to_month, to_year = month, year
     year = '20' + year
     to_year = '20' + to_year
 

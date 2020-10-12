@@ -22,11 +22,14 @@ async def get_string(message: types.Message) -> str:
         # Проверка сообщения на соответствие с стандартом "month.year"
         pattern = r'((0[1-9]|1[0-2])\.([0-9]\d))'
         # Проверка сообщения на соответствие с стандартом "month.year-month.year"
-        range_pattern = r'((0[1-9]|1[0-2])\.([0-9]\d))\-((0[1-9]|1[0-2])\.([0-9]\d))'
         _time = re.search(pattern, argument).group()
-        _range_time = re.search(range_pattern, argument).group().split('-')[1]
     except AttributeError:
         _time = ''
+    try:
+        range_pattern = r'((0[1-9]|1[0-2])\.([0-9]\d))\-((0[1-9]|1[0-2])\.([0-9]\d))'
+        _range_time = re.search(range_pattern, argument).group().split('-')[1]
+    except AttributeError:
+        _range_time = ''
 
     # Проверка сообщения на запрос фонда (Не начинается с цифры)
     fund_pattern = r'^\D*'
@@ -55,7 +58,6 @@ async def get_string(message: types.Message) -> str:
     else:
         # Если строка рейтинга пустая вернуть none
         return None
-
     return string
 
 
