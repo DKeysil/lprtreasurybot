@@ -50,7 +50,7 @@ async def transactions(message: types.Message, parameter=None):
         text='❌', callback_data=f't,l,0,{parameter}')
 
     right_list = await get_transcations(1, parameter)
-    if right_list:
+    if right_list[0]:
         right_button = types.InlineKeyboardButton(
             text='➡️', callback_data=f't,r,1,{parameter}'
         )
