@@ -56,9 +56,9 @@ async def transactions(message: types.Message, parameter=None):
         )
 
         markup.row(left_button, right_button)
-        _message = await message.answer(string, reply_markup=markup, parse_mode='HTML')
+        _message = await message.answer(string, reply_markup=markup, parse_mode='HTML', disable_web_page_preview=True)
     else:
-        _message = await message.answer(string, parse_mode='HTML')
+        _message = await message.answer(string, parse_mode='HTML', disable_web_page_preview=True)
 
 
 @dp.callback_query_handler(lambda callback_query: callback_query.data.split(',')[0] == 't')
@@ -109,7 +109,7 @@ async def handle_t_callback_query(callback_query: types.CallbackQuery):
 
     markup.row(left_button, right_button)
 
-    _message = await callback_query.message.edit_text(string, reply_markup=markup, parse_mode='HTML')
+    _message = await callback_query.message.edit_text(string, reply_markup=markup, parse_mode='HTML', disable_web_page_preview=True)
     await callback_query.answer()
 
 
@@ -174,7 +174,10 @@ def get_transcations_string(_transactions: list, _type: str) -> str:
             string += f'{date.strftime("%d.%m.%Y")} <code>{beauty_sum(data["total"]).strip(): >6}</code> ₽ {data["fund"]}\n'
     elif _type == 'fund':
         for data in _transactions:
+            mention = data["from"]
+            nickname = mention[1:]
             date = datetime.strptime(data['date'][0:10], '%Y-%m-%d')
-            string += f'{date.strftime("%d.%m.%Y")} <code>{beauty_sum(data["total"]).strip(): >6}</code> ₽ {data["from"]}\n'
+            string += f'{date.strftime("%d.%m.%Y")} <code>{beauty_sum(data["total"]).strip(): >6}</code> ₽ '
+            string += f'<a href="https://t.me/{nickname}">{mention}</a>\n'
 
     return string
