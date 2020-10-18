@@ -145,7 +145,7 @@ def get_fund_image(just_sum: int, fund_name: str, goal: int) -> str:
 
 def normalize_fund_title(fund_title: str) -> str:
     if not fund_title.startswith('#'):
-        return '#' + fund_title
+        return '#' + fund_title.lower()
     return fund_title
 
 
@@ -308,7 +308,7 @@ async def update_data():
             "from": from_.lower(),
             "total_currency": total_currency,
             "currency_name": currency_name,
-            "fund": fund,
+            "fund": fund.lower(),
             "comment": comment,
             "date": str(datetime.strptime(date, "%d.%m.%Y")),
             "total": total,
@@ -329,27 +329,3 @@ async def update_data():
     insert_result = await db.transactions.insert_many(db_rows)
     print('Update data. Insert transactions = ' +
           str(insert_result.inserted_ids))
-
-
-async def get_mention(message: types.Message) -> str:
-    """
-    Функция для получения ника пользователя.
-
-    Args:
-        message (types.Message): Сообщение
-
-    Returns:
-        (str): Ник пользователя в строковом формате
-    """
-    text = message.text
-
-    try:
-        mention = text.split(' ')[1]
-        if len(mention) > 32:
-            # Если ник пользователя будет слишком длинным, может не влезть в callback
-            return await message.reply('Указанное имя слишком длинное')
-    except IndexError:
-        mention = message.from_user.mention
-    mention = mention.lower()
-
-    return mention

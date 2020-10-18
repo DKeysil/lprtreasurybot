@@ -2,6 +2,7 @@ from bot import dp, types, FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 from bot.modules.transactions.Transactions import transactions
 from bot.modules.menu.Menu import menu
+from defs import google_sheets_values
 
 
 class Settings(StatesGroup):
@@ -19,7 +20,10 @@ async def transactions_menu(message: types.Message):
 
     # button if user want to check his transactions
     author_mention = types.KeyboardButton(message.from_user.mention)
-    btn_list = [[author_mention]]
+    funds = await google_sheets_values('lprtreasurybot.funds', 'A1', 'B99999')
+
+    funds = [i[1].lower() for i in funds if int(i[0]) != 0]
+    btn_list = [[author_mention], funds[0:3]]
     menu_keyboard_markup = types.ReplyKeyboardMarkup(btn_list)
     await Settings.await_mention.set()
     await message.answer('Пришлите ник или имя донатера.', reply_markup=menu_keyboard_markup)
@@ -37,4 +41,4 @@ async def get_mention(message: types.Message, state: FSMContext):
     mention = mention.lower()
     await state.finish()
     await menu(message)
-    await transactions(message, mention=mention)
+    await transactions(message, parameter=mention)

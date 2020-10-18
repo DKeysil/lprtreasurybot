@@ -7,7 +7,7 @@ import os
 async def funds(message: types.Message):
     _funds = await google_sheets_values('lprtreasurybot.funds', 'A1', 'B99999')
 
-    _funds = [[i[0], i[1][1:]] for i in _funds if int(i[0]) != 0]
+    _funds = [[i[0], i[1][1:].lower()] for i in _funds if int(i[0]) != 0]
 
     string = ''
 

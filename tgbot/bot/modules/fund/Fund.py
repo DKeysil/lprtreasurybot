@@ -1,5 +1,5 @@
 from bot import dp, types
-from defs import parse_command, normalize_fund_title, choose_default_fund, fund_sum, fund_string, get_fund_image
+from defs import normalize_fund_title, choose_default_fund, fund_sum, fund_string, get_fund_image
 
 
 async def send_fund(message, fund_total, fund_title, fund_goal):
@@ -16,16 +16,15 @@ async def send_fund(message, fund_total, fund_title, fund_goal):
 async def fund(message: types.Message):
     text_parts = message.text.split()
 
-    fund = None
     if len(text_parts) == 1:
         fund_title = await choose_default_fund()
-        fund = await fund_sum(fund_title)
+        _fund = await fund_sum(fund_title.lower())
     else:
         fund_title = normalize_fund_title(text_parts[1])
-        fund = await fund_sum(fund_title)
+        _fund = await fund_sum(fund_title)
 
-    if fund:
-        fund_total, fund_goal = fund
+    if _fund:
+        fund_total, fund_goal = _fund
         await send_fund(message, fund_total, fund_title, fund_goal)
     else:
         await message.reply('Фонд не найден', parse_mode='HTML')
