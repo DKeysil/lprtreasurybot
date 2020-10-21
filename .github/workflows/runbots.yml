@@ -17,7 +17,7 @@ jobs:
         # uses: cross-the-world/ssh-pipeline@7f022867934a210af826af99ef80d96f03a094d5
         uses: cross-the-world/ssh-pipeline@v1.2.0
         with:
-          host: ${{ secrets.HOST }
+          host: ${{ secrets.HOST }}
           port: ${{ secrets.PORT }}
           user: ${{ secrets.USERNAME }}
           key: ${{ secrets.KEY }}
