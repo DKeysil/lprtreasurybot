@@ -12,11 +12,15 @@ jobs:
     name: Build
     runs-on: ubuntu-latest
     steps:
-      - run: |
-          mkdir "$HOME/.ssh"
-          echo "${{ secrets.KEY }}" > "$HOME/.ssh/key"
-          chmod 600 "$HOME/.ssh/key"
-          ssh -i $HOME/.ssh/key -o StrictHostKeyChecking=no ${{ secrets.USERNAME }}@${{ secrets.HOST }} -p ${{ secrets.PORT }}
-          cd bots
-          . runbots.sh
-      
+      - name: ssh-pipeline
+        # You may pin to the exact commit or the version.
+        # uses: cross-the-world/ssh-pipeline@7f022867934a210af826af99ef80d96f03a094d5
+        uses: cross-the-world/ssh-pipeline@v1.2.0
+        with:
+          host: ${{ secrets.HOST }
+          port: ${{ secrets.PORT }}
+          user: ${{ secrets.USERNAME }}
+          key: ${{ secrets.KEY }}
+          script: |
+            cd bots
+            . runbots.sh      
