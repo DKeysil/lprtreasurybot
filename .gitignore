@@ -130,6 +130,9 @@ test.py
 ..gitignore.kate-swp
 data.json
 .vscode
+.idea
+tgbot/.idea
+tgbot/package-lock.json
 
 tgbot/assets/fund_default*.png
 mongodb/data

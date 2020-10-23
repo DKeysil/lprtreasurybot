@@ -1,3 +1,5 @@
+from bot.modules import cancel
+
 from bot.modules import status
 
 from bot.modules import fund
@@ -18,6 +20,6 @@ from bot.modules import menu
 
 from bot.modules import settings
 
-from bot.modules import cancel
-
 from bot.modules import start
+
+from bot.modules import get_me
