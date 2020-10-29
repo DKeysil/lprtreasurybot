@@ -178,7 +178,7 @@ def get_transcations_string(_transactions: list, _type: str) -> str:
             nickname = mention[1:]
             date = datetime.strptime(data['date'][0:10], '%Y-%m-%d')
             string += f'{date.strftime("%d.%m.%Y")} <code>{beauty_sum(data["total"]).strip(): >6}</code> ₽ '
-            if mention[0] == "@":
+            if mention.startswith('@'):
                 string += f'<a href="https://t.me/{nickname}">{mention}</a>\n'
             else:
                 string += f'{mention}\n'
