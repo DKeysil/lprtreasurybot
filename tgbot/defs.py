@@ -108,6 +108,9 @@ def get_fund_image(just_sum: int, fund_name: str, goal: int) -> str:
     Returns:
         str: Путь к изображению
     """
+    # Временное решение, надо нормально проверять и экспетить ошибку с неправильным данными
+    just_sum = int(just_sum)
+    goal = int(goal)
 
     in_file = 'assets/fund_default.jpg'
     out_file_name = (fund_name + '-' + beauty_sum(just_sum).replace(' ', '') +
