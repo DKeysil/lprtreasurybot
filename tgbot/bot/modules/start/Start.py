@@ -1,5 +1,6 @@
 from bot import dp, types
 from motor_client import SingletonClient
+from loguru import logger
 
 
 @dp.message_handler(lambda message: message.chat.type == 'private', commands=['start'])
@@ -21,6 +22,6 @@ async def start(message: types.Message):
                      'treasurer': False}
 
         result = await users_collection.insert_one(user_data)
-        print('start. Insert user id = ' + str(result.inserted_id))
+        logger.info('start. Insert user id = ' + str(result.inserted_id))
 
         await message.reply('Добро пожаловать.\nКоманда /menu откроет меню команд.')

@@ -5,6 +5,8 @@ from motor_client import SingletonClient
 import os
 from loop import loop
 import aiocron
+from loguru import logger
+from aiogram.utils import exceptions
 
 
 @aiocron.crontab('0 20 * * 1', loop=loop)
@@ -20,12 +22,14 @@ async def send_treasury_update():
 
     today = datetime.strftime(datetime.today(), '%d.%m.%Y')
     today = datetime.strptime(today + ' 20:00', '%d.%m.%Y %H:%M')
-    from_monday = datetime.fromtimestamp(datetime.timestamp(today) - 604800)
+    from_monday = datetime.timestamp(today) - 604800
     cursor = collection.find({
-        "date": {"$gte": str(from_monday)}
+        "timestamp": {"$gte": from_monday}
     })
 
     week_data = await cursor.to_list(length=await collection.count_documents({}))
+    logger.info(week_data)
+    logger.error(from_monday)
 
     users_cursor = db.users.find({})
 
@@ -43,6 +47,9 @@ async def send_treasury_update():
     string_ending = f'\n<a href="{os.environ["DONATE_LINK"]}">Задонатить</a>'
     text += string_ending
     for user in users:
-        print("user: ")
-        print(user)
-        await bot.send_message(user['user_id'], text, parse_mode='HTML', disable_web_page_preview=True)
+        logger.info("user: ")
+        logger.info(user)
+        try:
+            await bot.send_message(user['user_id'], text, parse_mode='HTML', disable_web_page_preview=True)
+        except exceptions.BotBlocked:
+            pass

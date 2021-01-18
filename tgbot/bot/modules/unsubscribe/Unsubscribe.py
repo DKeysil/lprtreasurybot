@@ -1,5 +1,6 @@
 from bot import dp, types
 from motor_client import SingletonClient
+from loguru import logger
 
 
 @dp.message_handler(commands=['unsubscribe'])
@@ -21,7 +22,7 @@ async def unsubscribe(message: types.Message):
             {"user_id": message.from_user.id},
             {"$set": {'subscribe': False}}
         )
-        print('Unsubscribe. Update user:\n' + str(result.raw_result))
+        logger.info('Unsubscribe. Update user:\n' + str(result.raw_result))
         await message.reply('Вы успешно отписались от обновлений')
     else:
         await message.reply('Вы не подписаны на обновления')

@@ -1,5 +1,6 @@
 from bot import dp, types
 from motor_client import SingletonClient
+from loguru import logger
 
 
 @dp.message_handler(commands=['subscribe'])
@@ -15,7 +16,7 @@ async def subscribe(message: types.Message):
     user = await db.users.find_one({
         "user_id": message.from_user.id
     })
-    print(user)
+    logger.info(user)
 
     if user is None:
         # if user not in DB creates user and subscribe him to notifications
@@ -25,7 +26,7 @@ async def subscribe(message: types.Message):
                      "subscribe": True}
 
         result = await db.users.insert_one(user_data)
-        print('Subscribe. Insert user id = ' + str(result.inserted_id))
+        logger.info('Subscribe. Insert user id = ' + str(result.inserted_id))
 
         await message.reply('Вы успешно подписались на обновления')
     elif user.get('subscribe'):
@@ -36,13 +37,13 @@ async def subscribe(message: types.Message):
             {"user_id": message.from_user.id},
             {"$set": {'subscribe': True}}
         )
-        print('Subscribe. Update user:\n' + str(result.raw_result))
+        logger.info('Subscribe. Update user:\n' + str(result.raw_result))
         await message.reply('Вы успешно подписались на обновления')
     else:
         result = await db.users.update_one(
             {"user_id": message.from_user.id},
             {"$set": {'subscribe': True}}
         )
-        print('Subscribe. Update user:\n' + str(result.raw_result))
+        logger.info('Subscribe. Update user:\n' + str(result.raw_result))
         await message.reply('Вы успешно подписались на обновления')
         

@@ -13,6 +13,7 @@ from PIL import Image, ImageDraw, ImageFont
 from motor_client import SingletonClient
 from loop import loop
 from bot import types
+from loguru import logger
 
 GOOGLE_SHEETS_API_KEY = os.environ['GOOGLE_SHEETS_API_KEY']
 GOOGLE_SHEETS_SPREADSHEET_ID = os.environ['GOOGLE_SHEETS_SPREADSHEET_ID']
@@ -49,7 +50,7 @@ async def google_sheets_values(
     async with aiohttp.ClientSession(loop=loop) as session:
         async with session.get(url, params=params) as response:
             json = await response.json()
-            print('google sheets values response: {}'.format(str(json)))
+            logger.info('google sheets values response: {}'.format(str(json)))
             return json.get('values', [])
 
 
@@ -258,7 +259,7 @@ async def rating_string(
     else:
         return None
 
-    print(dct)
+    logger.info(dct)
     list_d = list(dct.items())
     list_d.sort(key=lambda j: j[1], reverse=True)
     list_d = list_d[:10]
@@ -273,7 +274,6 @@ async def rating_string(
 
     for i in range(len(list_d)):
         if list_d[i][0].startswith('@'):
-            print
             string += '{}) <a href="https://t.me/{nickname}">{mention}</a> - <b>{sum}</b> ₽\n'.format(
                 i + 1, nickname=list_d[i][0][1:], mention=list_d[i][0], sum=beauty_sum(list_d[i][1]))
         else:
@@ -318,6 +318,7 @@ async def update_data():
             "currency": currency,
             "taxFree": tax_free == "TRUE",
             "treasuryBalance": treasury_balance,
+            "timestamp": datetime.strptime(date, "%d.%m.%Y").timestamp()
         }
 
         db_rows.append(db_row)
@@ -326,9 +327,9 @@ async def update_data():
 
     # Удаляются все данные из коллекции
     delete_result = await db.transactions.delete_many({})
-    print('Update data. Delete transactions:\n' + str(delete_result.raw_result))
+    logger.info('Update data. Delete transactions:\n' + str(delete_result.raw_result))
 
     # Таблица заполняется обновленным данными
     insert_result = await db.transactions.insert_many(db_rows)
-    print('Update data. Insert transactions = ' +
+    logger.info('Update data. Insert transactions = ' +
           str(insert_result.inserted_ids))

@@ -90,11 +90,11 @@ async def set_preffered_fund(message: types.Message, state: FSMContext):
     db = SingletonClient.get_data_base()
 
     result = await db.settings.update_one({"id": 0}, {"$set": {"preffered_fund": fund_name}})
-    print('set_preffered_fund. update preffered fund:\n' + str(result.raw_result))
+    logger.info('set_preffered_fund. update preffered fund:\n' + str(result.raw_result))
 
     if result.modified_count != 1:
         result = await db.settings.insert_one({"id": 0, "preffered_fund": fund_name})
-        print('set_preffered_fund. insert preffered fund id:\n' +
+        logger.info('set_preffered_fund. insert preffered fund id:\n' +
               str(result.inserted_id))
 
     await message.answer('Предпочтительный фонд был успешно изменен на {}'.format(fund_name), parse_mode='HTML')
@@ -167,11 +167,11 @@ async def set_allowed_chats(message: types.Message, state: FSMContext):
 
     if message.text == '-':
         result = await db.settings.update_one({"id": 0}, {"$set": {"allowed_chats": []}})
-        print('allowed_chats. update allowed chats:\n' + str(result.raw_result))
+        logger.info('allowed_chats. update allowed chats:\n' + str(result.raw_result))
 
         if result.modified_count != 1:
             result = await db.settings.insert_one({"id": 0, "allowed_chats": []})
-            print('allowed_chats. insert allowed chats id:\n' +
+            logger.info('allowed_chats. insert allowed chats id:\n' +
                   str(result.inserted_id))
         await message.answer('Теперь бот доступен из любого чата.')
         return await settings(message)
@@ -180,15 +180,15 @@ async def set_allowed_chats(message: types.Message, state: FSMContext):
         chats = list(map(int, message.text.split(', ')))
     except ValueError:
         chats = []
-        print('allowed_chats. ValueError while parse funds list')
+        logger.info('allowed_chats. ValueError while parse funds list')
 
     if chats:
         result = await db.settings.update_one({"id": 0}, {"$set": {"allowed_chats": chats}})
-        print('allowed_chats. update allowed chats:\n' + str(result.raw_result))
+        logger.info('allowed_chats. update allowed chats:\n' + str(result.raw_result))
 
         if result.modified_count != 1:
             result = await db.settings.insert_one({"id": 0, "allowed_chats": chats})
-            print('allowed_chats. insert allowed chats id:\n' +
+            logger.info('allowed_chats. insert allowed chats id:\n' +
                   str(result.inserted_id))
         await message.answer('Для бота были установлены доступные чаты.')
         return await settings(message)
